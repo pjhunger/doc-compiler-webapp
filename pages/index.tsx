@@ -253,10 +253,26 @@ export default function Home() {
           right: 0;
           bottom: 0;
           background-image: 
-            radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
-          background-size: 25px 25px;
-          opacity: 0.4;
+            radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+          background-size: 20px 20px;
+          opacity: 0.6;
           z-index: 2;
+          animation: grain 8s ease-in-out infinite;
+        }
+
+        @keyframes grain {
+          0%, 100% { 
+            transform: translate(0, 0); 
+          }
+          25% { 
+            transform: translate(-1px, 1px); 
+          }
+          50% { 
+            transform: translate(1px, -1px); 
+          }
+          75% { 
+            transform: translate(-1px, -1px); 
+          }
         }
 
         @keyframes wave {
