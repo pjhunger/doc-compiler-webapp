@@ -57,7 +57,10 @@ export default function Home() {
 
       <main className="main">
         <h1 className="title">
-          📚 Doc Compiler
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', verticalAlign: 'middle'}}>
+            <path d="M9 11H15M9 15H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Doc Compiler
         </h1>
 
         <p className="description">
@@ -66,16 +69,33 @@ export default function Home() {
 
         <div className="features">
           <div className="feature">
-            <h3>🗺️ Sitemap Discovery</h3>
-            <p>Automatisches Finden aller Dokumentationsseiten</p>
+            <div className="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11H15M9 15H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3>Smart Discovery</h3>
+            <p>Automatic sitemap crawling finds all documentation pages efficiently</p>
           </div>
           <div className="feature">
-            <h3>🤖 AI-optimiert</h3>
-            <p>Perfekt strukturiert für Claude, ChatGPT & Co.</p>
+            <div className="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.813 15.904L9 18.75L10.813 17.594C12.459 16.465 14.486 16.086 16.407 16.531C18.328 16.976 19.964 18.217 20.875 19.906C21.786 21.595 21.875 23.562 21.125 25.313" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 1V3M21 12H23M12 21V23M4.22 4.22L5.64 5.64M18.36 5.64L19.78 4.22M1 12H3M4.22 19.78L5.64 18.36M18.36 18.36L19.78 19.78" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3>AI-Optimized</h3>
+            <p>Clean, structured output designed specifically for LLM consumption</p>
           </div>
           <div className="feature">
-            <h3>⚡ Schnell</h3>
-            <p>Innerhalb von Sekunden fertig</p>
+            <div className="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <h3>Lightning Fast</h3>
+            <p>Process entire documentation sites in seconds, not minutes</p>
           </div>
         </div>
 
@@ -95,23 +115,52 @@ export default function Home() {
               disabled={isLoading || !url}
               className="submit-btn"
             >
-              {isLoading ? '🔄 Kompiliert...' : '🚀 Kompilieren'}
+              {isLoading ? (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', animation: 'spin 1s linear infinite'}}>
+                    <path d="M21 12A9 9 0 11.818 8.218L2.75 9.282" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Kompiliert...
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Kompilieren
+                </>
+              )}
             </button>
           </div>
         </form>
 
         {error && (
           <div className="error">
-            <p>❌ Fehler: {error}</p>
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" strokeWidth="2"/>
+                <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              Fehler: {error}
+            </div>
           </div>
         )}
 
         {result && (
           <div className="result">
             <div className="result-header">
-              <h2>✅ Fertig!</h2>
+              <h2 style={{display: 'flex', alignItems: 'center'}}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                  <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Fertig!
+              </h2>
               <button onClick={downloadMarkdown} className="download-btn">
-                📥 Download .md
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                  <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15M7 10L12 15L17 10M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Download .md
               </button>
             </div>
             <pre className="result-content">{result.substring(0, 2000)}...</pre>
@@ -122,7 +171,20 @@ export default function Home() {
         )}
 
         <div className="examples">
-          <h3>💡 Beispiele zum Ausprobieren:</h3>
+          <h3 style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+              <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
+              <line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" strokeWidth="2"/>
+              <line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" strokeWidth="2"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" strokeWidth="2"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" strokeWidth="2"/>
+              <line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" strokeWidth="2"/>
+              <line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="2"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" strokeWidth="2"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+            Beispiele zum Ausprobieren:
+          </h3>
           <div className="example-links">
             <button onClick={() => setUrl('https://docs.stripe.com/api')} className="example-btn">
               Stripe API Docs
@@ -139,8 +201,16 @@ export default function Home() {
 
       <footer className="footer">
         <p>
-          Made with ❤️ for the AI community • 
-          <a href="https://github.com/yourusername/doc-compiler" target="_blank" rel="noopener noreferrer">
+          Made with 
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginLeft: '0.25rem', marginRight: '0.25rem', verticalAlign: 'middle'}}>
+            <path d="M20.84 4.61A5.5 5.5 0 0016.5 2C14.86 2 13.5 2.93 12 4.86 10.5 2.93 9.14 2 7.5 2A5.5 5.5 0 003.16 4.61C2.42 5.35 2 6.36 2 7.44 2 8.52 2.42 9.53 3.16 10.27L12 19.1L20.84 10.27C21.58 9.53 22 8.52 22 7.44 22 6.36 21.58 5.35 20.84 4.61Z" fill="#ef4444"/>
+          </svg>
+          for the AI community • 
+          <a href="https://github.com/pjhunger" target="_blank" rel="noopener noreferrer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.25rem', verticalAlign: 'middle'}}>
+              <path d="M9 19C4 20.5 4 16.5 2 16M22 16V19.5C22 20.8807 20.8807 22 19.5 22H15.5C14.1193 22 13 20.8807 13 19.5V18.5C13 17.1193 14.1193 16 15.5 16H19.5C20.8807 16 22 17.1193 22 19.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 22V18.13A3.37 3.37 0 0015.3 16.17C13.2 15.8 9 14.65 9 9.5A7.92 7.92 0 0111 4.9A7.23 7.23 0 0112 1.27A3.5 3.5 0 0116 2.5V4.09C18.09 4.8 19.5 7.13 19.5 9.5C19.5 14.65 15.3 15.8 13.2 16.17A3.37 3.37 0 0012.7 18.13V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             GitHub
           </a>
         </p>
@@ -149,43 +219,43 @@ export default function Home() {
       <style jsx>{`
         .container {
           min-height: 100vh;
-          padding: 0 0.5rem;
+          width: 100vw;
+          padding: 0;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
           background: #0a0a0a;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
           position: relative;
-          overflow: hidden;
+          overflow-x: hidden;
         }
 
         .container::before {
           content: '';
-          position: absolute;
+          position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
           background: 
-            radial-gradient(circle at 20% 80%, rgba(255, 230, 0, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 193, 7, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(255, 235, 59, 0.08) 0%, transparent 50%);
-          animation: wave 8s ease-in-out infinite;
+            radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 60%),
+            radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.25) 0%, transparent 60%),
+            radial-gradient(circle at 40% 40%, rgba(239, 68, 68, 0.2) 0%, transparent 60%);
+          filter: blur(80px);
+          animation: wave 12s ease-in-out infinite;
           z-index: 1;
         }
 
         .container::after {
           content: '';
-          position: absolute;
+          position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
           background-image: 
-            radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
-          background-size: 20px 20px;
-          opacity: 0.3;
+            radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+          background-size: 25px 25px;
+          opacity: 0.4;
           z-index: 2;
         }
 
@@ -201,15 +271,25 @@ export default function Home() {
           }
         }
 
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
         .main {
-          padding: 3rem 1rem;
+          padding: 4rem 2rem;
           flex: 1;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          max-width: 600px;
+          max-width: 800px;
           width: 100%;
+          margin: 0 auto;
           position: relative;
           z-index: 10;
         }
@@ -236,10 +316,11 @@ export default function Home() {
 
         .features {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
           margin-bottom: 4rem;
           width: 100%;
+          max-width: 720px;
         }
 
         .feature {
@@ -270,6 +351,14 @@ export default function Home() {
           opacity: 0.8;
           font-size: 0.875rem;
           line-height: 1.5;
+        }
+
+        .feature-icon {
+          margin-bottom: 1rem;
+          color: rgba(255, 255, 255, 0.9);
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
         .form {
