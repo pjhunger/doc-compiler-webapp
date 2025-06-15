@@ -1,82 +1,109 @@
-# Doc Compiler Web App
+# 📚 Doc Compiler
 
-Eine einfache Web-Anwendung zum Kompilieren von Dokumentations-Websites in AI-freundliche Formate.
+> Transform any documentation website into AI-friendly format instantly
 
-## Features
+**Problem:** AI assistants like Claude and ChatGPT often struggle with scattered documentation across multiple pages, or forget important details during long coding sessions.
 
-🗺️ **Sitemap Discovery** - Automatisches Finden aller Dokumentationsseiten  
-🤖 **AI-optimiert** - Perfekt strukturiert für Claude, ChatGPT & Co.  
-⚡ **Schnell** - Innerhalb von Sekunden fertig  
-📱 **Responsive** - Funktioniert auf Desktop und Mobile  
+**Solution:** Doc Compiler crawls documentation websites and creates clean, structured markdown files optimized for AI consumption.
 
-## Deployment
+## ✨ Live Demo
 
-### Option 1: Vercel (Empfohlen)
+🌐 **[Try it now](https://doc-compiler.vercel.app)** - No signup required!
 
-1. Fork dieses Repository auf GitHub
-2. Gehe zu [vercel.com](https://vercel.com)
-3. Klicke "New Project" 
-4. Wähle dein GitHub Repository
-5. Deploy! 🚀
+## 🎯 Why Use Doc Compiler?
 
-### Option 2: Netlify
+### For AI-Assisted Development
+- **Perfect for Claude/ChatGPT**: Get complete API docs in one file
+- **No more context loss**: Keep all documentation in one place
+- **Faster development**: Stop switching between docs and code
 
-1. Gehe zu [netlify.com](https://netlify.com)
-2. Drag & drop den `doc-compiler-webapp` Ordner
-3. Oder verbinde mit GitHub für automatische Deployments
+### For Documentation Teams
+- **Quick exports**: Convert websites to markdown instantly
+- **AI-optimized format**: Structured for maximum AI comprehension
+- **No installation**: Use directly in browser
 
-### Option 3: Railway
+## 🚀 How It Works
 
-1. Gehe zu [railway.app](https://railway.app)
-2. "Deploy from GitHub"
-3. Wähle das Repository
+1. **Paste URL** - Enter any documentation website URL
+2. **Auto-crawl** - Intelligent sitemap discovery finds all pages
+3. **AI-optimize** - Clean formatting removes navigation, ads, clutter
+4. **Download** - Get structured markdown file ready for AI tools
 
-## Lokale Entwicklung
+## 💡 Perfect For
 
-```bash
-# Dependencies installieren
-npm install
+- **API Documentation** (Stripe, OpenAI, Anthropic)
+- **Framework Docs** (React, Next.js, Vue)
+- **Tool Documentation** (Docker, Kubernetes, AWS)
+- **Library References** (Any developer documentation)
 
-# Development server starten
-npm run dev
+## 🎨 Features
 
-# Build für Production
-npm run build
-npm start
-```
+🗺️ **Smart Crawling** - Automatically discovers all documentation pages via sitemap  
+🤖 **AI-Optimized** - Clean, structured output perfect for LLMs  
+⚡ **Lightning Fast** - Results in seconds, not minutes  
+📱 **Mobile-Ready** - Beautiful responsive design  
+🎯 **Zero Setup** - No accounts, no installation, just paste and go  
+📥 **Instant Download** - Get markdown files immediately  
 
-## Kostenlose Limits
-
-**Vercel (kostenlos):**
-- 100GB Bandwidth/Monat
-- 1000 Serverless Function Invocations/Tag
-- Custom Domain möglich
-
-**Netlify (kostenlos):**
-- 100GB Bandwidth/Monat  
-- 125k Function Invocations/Monat
-
-## Monetarisierung später
-
-Wenn das Tool gut ankommt, kannst du später:
-
-1. **API-Keys einführen** für Power-User
-2. **Premium Features** (mehr Seiten, bessere Qualität)
-3. **API-as-a-Service** mit Rate Limits
-4. **Stripe Integration** für Payments
-
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Frontend**: Next.js + React + TypeScript
-- **Backend**: Next.js API Routes (Serverless)
-- **Styling**: CSS-in-JS (styled-jsx)
-- **Deployment**: Vercel/Netlify (kostenlos)
+- **Backend**: Serverless API Routes
+- **Styling**: Modern CSS-in-JS with glass morphism
+- **Deployment**: Vercel (Edge functions)
 
-## Roadmap
+## 🎪 Examples
 
-- [ ] Sitemap Integration aus der CLI Version
-- [ ] Batch Processing mehrerer URLs
-- [ ] Export Formate (PDF, DOCX)
-- [ ] User Accounts & Saved Documents
-- [ ] Rate Limiting & API Keys
-- [ ] Analytics Dashboard
+Try these popular documentation sites:
+
+- **Stripe API**: `https://docs.stripe.com/api`
+- **OpenAI API**: `https://platform.openai.com/docs`
+- **React Docs**: `https://react.dev/reference`
+- **Next.js Docs**: `https://nextjs.org/docs`
+
+## 🚀 Development
+
+```bash
+# Clone the repository
+git clone https://github.com/pjhunger/doc-compiler.git
+cd doc-compiler
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## 📈 Roadmap
+
+- [ ] **Batch Processing** - Multiple URLs at once
+- [ ] **Custom Formats** - PDF, DOCX export options
+- [ ] **Advanced Filtering** - Include/exclude specific sections
+- [ ] **API Access** - Programmatic usage
+- [ ] **Team Features** - Shared libraries and collections
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs or request features via [Issues](https://github.com/pjhunger/doc-compiler/issues)
+- Submit pull requests for improvements
+- Share feedback and suggestions
+
+## 📄 License
+
+MIT License - feel free to use this project for anything!
+
+---
+
+<div align="center">
+
+**Made with ❤️ for the AI development community**
+
+[Live Demo](https://doc-compiler.vercel.app) • [Report Bug](https://github.com/pjhunger/doc-compiler/issues) • [Request Feature](https://github.com/pjhunger/doc-compiler/issues)
+
+</div>
