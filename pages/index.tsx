@@ -1,13 +1,33 @@
 import { useState } from 'react';
 import Head from 'next/head';
 
+interface PageInfo {
+  url: string;
+  title: string;
+  category: string;
+  description?: string;
+  estimatedSize: string;
+}
+
+interface DiscoveryData {
+  baseUrl: string;
+  title: string;
+  totalPages: number;
+  categories: { [category: string]: PageInfo[] };
+  estimatedTotalSize: string;
+}
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDiscovering, setIsDiscovering] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
+  const [discoveryData, setDiscoveryData] = useState<DiscoveryData | null>(null);
+  const [selectedPages, setSelectedPages] = useState<Set<string>>(new Set());
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSimpleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -33,6 +53,97 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDiscovery = async () => {
+    setIsDiscovering(true);
+    setError('');
+    setDiscoveryData(null);
+
+    try {
+      const response = await fetch('/api/discover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setDiscoveryData(data.data);
+      // Pre-select all pages
+      const allPages = Object.values(data.data.categories).flat().map((page) => (page as PageInfo).url);
+      setSelectedPages(new Set(allPages));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Entdeckung fehlgeschlagen');
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
+  const handleAdvancedCompile = async () => {
+    if (!discoveryData || selectedPages.size === 0) return;
+    
+    setIsLoading(true);
+    setError('');
+    setResult('');
+
+    try {
+      const response = await fetch('/api/compile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          url: discoveryData.baseUrl,
+          selectedPages: Array.from(selectedPages)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResult(data.content);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Kompilierung fehlgeschlagen');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const togglePageSelection = (pageUrl: string) => {
+    const newSelected = new Set(selectedPages);
+    if (newSelected.has(pageUrl)) {
+      newSelected.delete(pageUrl);
+    } else {
+      newSelected.add(pageUrl);
+    }
+    setSelectedPages(newSelected);
+  };
+
+  const toggleCategorySelection = (pages: PageInfo[], selectAll: boolean) => {
+    const newSelected = new Set(selectedPages);
+    pages.forEach(page => {
+      if (selectAll) {
+        newSelected.add(page.url);
+      } else {
+        newSelected.delete(page.url);
+      }
+    });
+    setSelectedPages(newSelected);
+  };
+
+  const resetDiscovery = () => {
+    setDiscoveryData(null);
+    setSelectedPages(new Set());
+    setError('');
+    setResult('');
   };
 
   const downloadMarkdown = () => {
@@ -94,45 +205,195 @@ export default function Home() {
                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3>Lightning Fast</h3>
-            <p>Process entire documentation sites in seconds, not minutes</p>
+            <h3>Selective Extraction</h3>
+            <p>Choose exactly which pages to include for context-optimized results</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="form">
-          <div className="input-group">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://docs.example.com"
-              required
-              className="url-input"
-              disabled={isLoading}
-            />
-            <button 
-              type="submit" 
-              disabled={isLoading || !url}
-              className="submit-btn"
-            >
-              {isLoading ? (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', animation: 'spin 1s linear infinite'}}>
-                    <path d="M21 12A9 9 0 11.818 8.218L2.75 9.282" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Kompiliert...
-                </>
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
-                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Kompilieren
-                </>
-              )}
-            </button>
+        {/* Mode Toggle */}
+        <div className="mode-toggle">
+          <button 
+            type="button"
+            className={`mode-btn ${mode === 'simple' ? 'active' : ''}`}
+            onClick={() => { setMode('simple'); resetDiscovery(); }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Einfach
+          </button>
+          <button 
+            type="button"
+            className={`mode-btn ${mode === 'advanced' ? 'active' : ''}`}
+            onClick={() => { setMode('advanced'); resetDiscovery(); }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+              <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3ZM12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8ZM12 14C13.1046 14 14 14.8954 14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Erweitert
+          </button>
+        </div>
+
+        {mode === 'simple' ? (
+          <form onSubmit={handleSimpleSubmit} className="form">
+            <div className="input-group">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://docs.example.com"
+                required
+                className="url-input"
+                disabled={isLoading}
+              />
+              <button 
+                type="submit" 
+                disabled={isLoading || !url}
+                className="submit-btn"
+              >
+                {isLoading ? (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', animation: 'spin 1s linear infinite'}}>
+                      <path d="M21 12A9 9 0 11.818 8.218L2.75 9.282" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Kompiliert...
+                  </>
+                ) : (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                      <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Kompilieren
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="advanced-mode">
+            {!discoveryData ? (
+              <div className="discovery-section">
+                <div className="input-group">
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="https://docs.example.com"
+                    required
+                    className="url-input"
+                    disabled={isDiscovering}
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleDiscovery}
+                    disabled={isDiscovering || !url}
+                    className="discover-btn"
+                  >
+                    {isDiscovering ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', animation: 'spin 1s linear infinite'}}>
+                          <path d="M21 12A9 9 0 11.818 8.218L2.75 9.282" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Analysiere...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                          <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Analysieren
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="selection-section">
+                <div className="discovery-header">
+                  <h3>📚 {discoveryData.title}</h3>
+                  <p>Gefunden: {discoveryData.totalPages} Seiten • Geschätzte Größe: {discoveryData.estimatedTotalSize}</p>
+                  <button 
+                    type="button"
+                    onClick={resetDiscovery}
+                    className="reset-btn"
+                  >
+                    ← Neue Analyse
+                  </button>
+                </div>
+                
+                <div className="page-categories">
+                  {Object.entries(discoveryData.categories).map(([category, pages]) => {
+                    const allSelected = pages.every(page => selectedPages.has(page.url));
+                    const someSelected = pages.some(page => selectedPages.has(page.url));
+                    
+                    return (
+                      <div key={category} className="category-section">
+                        <div className="category-header">
+                          <label className="category-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={allSelected}
+                              ref={input => {
+                                if (input) input.indeterminate = someSelected && !allSelected;
+                              }}
+                              onChange={(e) => toggleCategorySelection(pages, e.target.checked)}
+                            />
+                            <h4>{category} ({pages.length})</h4>
+                          </label>
+                        </div>
+                        
+                        <div className="pages-list">
+                          {pages.map(page => (
+                            <label key={page.url} className="page-checkbox">
+                              <input
+                                type="checkbox"
+                                checked={selectedPages.has(page.url)}
+                                onChange={() => togglePageSelection(page.url)}
+                              />
+                              <div className="page-info">
+                                <div className="page-title">{page.title}</div>
+                                <div className="page-meta">
+                                  {page.description && <span className="page-desc">{page.description}</span>}
+                                  <span className="page-size">{page.estimatedSize}</span>
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <div className="compile-section">
+                  <button 
+                    type="button"
+                    onClick={handleAdvancedCompile}
+                    disabled={isLoading || selectedPages.size === 0}
+                    className="submit-btn"
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem', animation: 'spin 1s linear infinite'}}>
+                          <path d="M21 12A9 9 0 11.818 8.218L2.75 9.282" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Kompiliert {selectedPages.size} Seiten...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                          <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {selectedPages.size} Seiten Kompilieren
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        </form>
+        )}
 
         {error && (
           <div className="error">
@@ -303,7 +564,7 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          max-width: 800px;
+          max-width: 900px;
           width: 100%;
           margin: 0 auto;
           position: relative;
@@ -377,8 +638,48 @@ export default function Home() {
           align-items: center;
         }
 
+        .mode-toggle {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 2rem;
+          justify-content: center;
+        }
+
+        .mode-btn {
+          padding: 0.75rem 1.5rem;
+          border: 1px solid rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.05);
+          color: rgba(255,255,255,0.7);
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          font-family: inherit;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+        }
+
+        .mode-btn:hover {
+          background: rgba(255,255,255,0.1);
+          color: white;
+        }
+
+        .mode-btn.active {
+          background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+          color: #000;
+          border-color: #ffd700;
+        }
+
         .form {
           width: 100%;
+          margin-bottom: 2rem;
+        }
+
+        .advanced-mode {
+          width: 100%;
+        }
+
+        .discovery-section {
           margin-bottom: 2rem;
         }
 
@@ -424,6 +725,8 @@ export default function Home() {
           font-family: inherit;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           white-space: nowrap;
+          display: flex;
+          align-items: center;
         }
 
         .submit-btn:hover:not(:disabled) {
@@ -437,6 +740,176 @@ export default function Home() {
           color: rgba(255,255,255,0.3);
           cursor: not-allowed;
           transform: none;
+        }
+
+        .discover-btn {
+          padding: 1rem 1.75rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-family: inherit;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          white-space: nowrap;
+          display: flex;
+          align-items: center;
+        }
+
+        .discover-btn:hover:not(:disabled) {
+          background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .discover-btn:disabled {
+          background: rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.3);
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .selection-section {
+          background: rgba(255,255,255,0.04);
+          backdrop-filter: blur(20px);
+          border-radius: 16px;
+          padding: 2rem;
+          border: 1px solid rgba(255,255,255,0.08);
+          margin-bottom: 2rem;
+        }
+
+        .discovery-header {
+          margin-bottom: 2rem;
+          text-align: center;
+        }
+
+        .discovery-header h3 {
+          margin: 0 0 0.5rem 0;
+          color: white;
+          font-size: 1.25rem;
+        }
+
+        .discovery-header p {
+          margin: 0 0 1rem 0;
+          color: rgba(255,255,255,0.7);
+          font-size: 0.9rem;
+        }
+
+        .reset-btn {
+          background: rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.7);
+          border: 1px solid rgba(255,255,255,0.2);
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          font-family: inherit;
+          transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+          background: rgba(255,255,255,0.15);
+          color: white;
+        }
+
+        .page-categories {
+          margin-bottom: 2rem;
+        }
+
+        .category-section {
+          margin-bottom: 1.5rem;
+        }
+
+        .category-header {
+          margin-bottom: 0.75rem;
+        }
+
+        .category-checkbox {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          color: white;
+        }
+
+        .category-checkbox input {
+          margin-right: 0.75rem;
+          width: 16px;
+          height: 16px;
+        }
+
+        .category-checkbox h4 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 500;
+        }
+
+        .pages-list {
+          margin-left: 2rem;
+          border-left: 1px solid rgba(255,255,255,0.1);
+          padding-left: 1rem;
+        }
+
+        .page-checkbox {
+          display: flex;
+          align-items: flex-start;
+          cursor: pointer;
+          color: rgba(255,255,255,0.8);
+          margin-bottom: 0.75rem;
+          padding: 0.5rem;
+          border-radius: 6px;
+          transition: background 0.2s ease;
+        }
+
+        .page-checkbox:hover {
+          background: rgba(255,255,255,0.05);
+        }
+
+        .page-checkbox input {
+          margin-right: 0.75rem;
+          margin-top: 0.125rem;
+          width: 14px;
+          height: 14px;
+          flex-shrink: 0;
+        }
+
+        .page-info {
+          flex: 1;
+        }
+
+        .page-title {
+          font-size: 0.9rem;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+          color: white;
+        }
+
+        .page-meta {
+          display: flex;
+          gap: 1rem;
+          align-items: center;
+        }
+
+        .page-desc {
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.6);
+          flex: 1;
+        }
+
+        .page-size {
+          font-size: 0.75rem;
+          color: rgba(255,255,255,0.5);
+          background: rgba(255,255,255,0.1);
+          padding: 0.125rem 0.5rem;
+          border-radius: 12px;
+          white-space: nowrap;
+        }
+
+        .compile-section {
+          text-align: center;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .error {
@@ -482,6 +955,8 @@ export default function Home() {
           font-size: 0.85rem;
           font-family: inherit;
           transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
         }
 
         .download-btn:hover {
@@ -590,6 +1065,28 @@ export default function Home() {
           
           .main {
             padding: 2rem 1rem;
+          }
+
+          .mode-toggle {
+            flex-direction: column;
+            align-items: center;
+          }
+
+          .mode-btn {
+            width: 100%;
+            max-width: 200px;
+            justify-content: center;
+          }
+
+          .pages-list {
+            margin-left: 1rem;
+            padding-left: 0.5rem;
+          }
+
+          .page-meta {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
           }
         }
       `}</style>

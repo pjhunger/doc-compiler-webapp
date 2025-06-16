@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 interface CompileRequest {
   url: string;
+  selectedPages?: string[];
 }
 
 interface CompileResponse {
@@ -30,7 +31,7 @@ export default async function handler(
     });
   }
 
-  const { url }: CompileRequest = req.body;
+  const { url, selectedPages }: CompileRequest = req.body;
 
   if (!url) {
     return res.status(400).json({ 
@@ -51,7 +52,7 @@ export default async function handler(
 
   try {
     // Enhanced compilation with sitemap discovery
-    const compiledContent = await compileDocumentationEnhanced(url);
+    const compiledContent = await compileDocumentationEnhanced(url, selectedPages);
     
     return res.status(200).json({
       success: true,
@@ -68,7 +69,7 @@ export default async function handler(
 }
 
 // Enhanced compilation function with sitemap discovery and better content extraction
-async function compileDocumentationEnhanced(url: string) {
+async function compileDocumentationEnhanced(url: string, selectedPages?: string[]) {
   console.log(`🚀 Compiling documentation from: ${url}`);
   
   const results = await Promise.allSettled([
@@ -84,7 +85,16 @@ async function compileDocumentationEnhanced(url: string) {
   }
   
   // Get unique documentation URLs
-  const allUrls = [url, ...sitemapResult].filter((u, i, arr) => arr.indexOf(u) === i).slice(0, 15); // Limit to 15 pages
+  let allUrls: string[];
+  
+  if (selectedPages && selectedPages.length > 0) {
+    // Use selected pages from advanced mode
+    allUrls = selectedPages;
+    console.log(`📋 Using ${selectedPages.length} selected pages`);
+  } else {
+    // Use sitemap discovery for simple mode
+    allUrls = [url, ...sitemapResult].filter((u, i, arr) => arr.indexOf(u) === i).slice(0, 15); // Limit to 15 pages
+  }
   
   console.log(`📄 Found ${allUrls.length} pages to process`);
   
