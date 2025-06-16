@@ -48,9 +48,10 @@
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js + React + TypeScript
-- **Backend**: Serverless API Routes
+- **Backend**: Serverless API Routes (Discovery + Compile)
 - **Styling**: Modern CSS-in-JS with glass morphism
 - **Deployment**: Vercel (Edge functions)
+- **Features**: Simple & Advanced modes with selective extraction
 
 ## 🎪 Examples
 
