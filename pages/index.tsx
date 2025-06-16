@@ -222,16 +222,32 @@ export default function Home() {
             </svg>
             Einfach
           </button>
-          <button 
-            type="button"
-            className={`mode-btn ${mode === 'advanced' ? 'active' : ''}`}
-            onClick={() => { setMode('advanced'); resetDiscovery(); }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
-              <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3ZM12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8ZM12 14C13.1046 14 14 14.8954 14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Erweitert
-          </button>
+          <div className="mode-btn-wrapper">
+            <button 
+              type="button"
+              className={`mode-btn ${mode === 'advanced' ? 'active' : ''}`}
+              onClick={() => { setMode('advanced'); resetDiscovery(); }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '0.5rem'}}>
+                <path d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3ZM12 8C13.1046 8 14 8.89543 14 10C14 11.1046 13.1046 12 12 12C10.8954 12 10 11.1046 10 10C10 8.89543 10.8954 8 12 8ZM12 14C13.1046 14 14 14.8954 14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Erweitert
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginLeft: '0.25rem', opacity: 0.7}}>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M9 9H15V15H9V9Z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M16 8L8 16M16 16L8 8" stroke="currentColor" strokeWidth="1" opacity="0.5"/>
+              </svg>
+            </button>
+            <div className="tooltip">
+              <div className="tooltip-content">
+                <strong>🎯 Erweitert Modus</strong><br/>
+                <span>1. Analysiert die Dokumentations-Struktur</span><br/>
+                <span>2. Lässt dich spezifische Seiten auswählen</span><br/>
+                <span>3. Optimiert für große Dokumentationen</span><br/>
+                <small>💡 Perfekt um nur API Reference oder bestimmte Guides zu extrahieren</small>
+              </div>
+            </div>
+          </div>
         </div>
 
         {mode === 'simple' ? (
@@ -668,6 +684,64 @@ export default function Home() {
           background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
           color: #000;
           border-color: #ffd700;
+        }
+
+        .mode-btn-wrapper {
+          position: relative;
+          display: inline-block;
+        }
+
+        .tooltip {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 8px;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+          z-index: 1000;
+        }
+
+        .mode-btn-wrapper:hover .tooltip {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .tooltip-content {
+          background: rgba(0, 0, 0, 0.9);
+          backdrop-filter: blur(20px);
+          color: white;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          line-height: 1.4;
+          white-space: nowrap;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip-content strong {
+          color: #ffd700;
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+
+        .tooltip-content small {
+          opacity: 0.8;
+          font-style: italic;
+          display: block;
+          margin-top: 0.25rem;
+        }
+
+        .tooltip::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: rgba(0, 0, 0, 0.9);
         }
 
         .form {

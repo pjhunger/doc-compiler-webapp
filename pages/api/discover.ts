@@ -77,18 +77,20 @@ export default async function handler(
 async function discoverDocumentationStructure(url: string) {
   const results = await Promise.allSettled([
     discoverSitemap(url),
-    fetchMainPageInfo(url)
+    fetchMainPageInfo(url),
+    discoverNavigationLinks(url)
   ]);
   
   const sitemapResult = results[0].status === 'fulfilled' ? results[0].value : [];
   const mainPageInfo = results[1].status === 'fulfilled' ? results[1].value : null;
+  const navigationResult = results[2].status === 'fulfilled' ? results[2].value : [];
   
   if (!mainPageInfo) {
     throw new Error('Failed to fetch main page information');
   }
   
-  // Combine main page with sitemap URLs
-  const allUrls = [url, ...sitemapResult].filter((u, i, arr) => arr.indexOf(u) === i);
+  // Combine main page with sitemap URLs and navigation links
+  const allUrls = [url, ...sitemapResult, ...navigationResult].filter((u, i, arr) => arr.indexOf(u) === i);
   
   console.log(`📊 Analyzing ${allUrls.length} pages for categorization`);
   
@@ -141,13 +143,25 @@ async function discoverSitemap(baseUrl: string): Promise<string[]> {
         const xml = await response.text();
         const urls = extractUrlsFromSitemap(xml);
         console.log(`🗺 Found ${urls.length} URLs in sitemap`);
-        return urls.filter(url => 
-          url.includes('/docs') || 
-          url.includes('/api') || 
-          url.includes('/guide') ||
-          url.includes('/reference') ||
-          url.includes('/tutorial')
-        );
+        return urls.filter(url => {
+          const lowerUrl = url.toLowerCase();
+          return lowerUrl.includes('/docs') || 
+                 lowerUrl.includes('/api') || 
+                 lowerUrl.includes('/guide') ||
+                 lowerUrl.includes('/reference') ||
+                 lowerUrl.includes('/tutorial') ||
+                 lowerUrl.includes('/examples') ||
+                 lowerUrl.includes('/ref/') ||
+                 lowerUrl.includes('/documentation') ||
+                 // Don't filter too aggressively - let's be more inclusive
+                 (!lowerUrl.includes('/blog') && 
+                  !lowerUrl.includes('/changelog') && 
+                  !lowerUrl.includes('/careers') &&
+                  !lowerUrl.includes('/about') &&
+                  !lowerUrl.includes('/contact') &&
+                  !lowerUrl.includes('/privacy') &&
+                  !lowerUrl.includes('/terms'));
+        });
       }
     } catch (error) {
       console.warn(`Sitemap not found: ${sitemapUrl}`);
@@ -155,6 +169,84 @@ async function discoverSitemap(baseUrl: string): Promise<string[]> {
   }
   
   return [];
+}
+
+// Discover navigation links from the main page
+async function discoverNavigationLinks(baseUrl: string): Promise<string[]> {
+  try {
+    const response = await fetch(baseUrl, { 
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; DocCompiler/1.0)' },
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (response.ok) {
+      const html = await response.text();
+      const navigationUrls = extractNavigationLinks(html, baseUrl);
+      console.log(`🧭 Found ${navigationUrls.length} navigation links`);
+      return navigationUrls;
+    }
+  } catch (error) {
+    console.warn(`Navigation discovery failed: ${baseUrl}`);
+  }
+  
+  return [];
+}
+
+function extractNavigationLinks(html: string, baseUrl: string): string[] {
+  const urls: string[] = [];
+  const baseUrlObj = new URL(baseUrl);
+  
+  // Look for navigation patterns
+  const navPatterns = [
+    /<nav[^>]*>([\s\S]*?)<\/nav>/gi,
+    /<header[^>]*>([\s\S]*?)<\/header>/gi,
+    /<div[^>]*class[^>]*nav[^>]*>([\s\S]*?)<\/div>/gi,
+    /<ul[^>]*class[^>]*menu[^>]*>([\s\S]*?)<\/ul>/gi
+  ];
+  
+  navPatterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(html)) !== null) {
+      const navSection = match[1];
+      const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([^<]+)<\/a>/gi;
+      let linkMatch;
+      
+      while ((linkMatch = linkRegex.exec(navSection)) !== null) {
+        try {
+          let href = linkMatch[1];
+          const linkText = linkMatch[2].toLowerCase();
+          
+          // Skip non-documentation links
+          if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) {
+            continue;
+          }
+          
+          // Convert relative URLs to absolute
+          if (href.startsWith('/')) {
+            href = `${baseUrlObj.origin}${href}`;
+          } else if (!href.startsWith('http')) {
+            href = new URL(href, baseUrl).href;
+          }
+          
+          // Only include same-origin documentation links
+          if (href.startsWith(baseUrlObj.origin) && 
+              (linkText.includes('guide') || 
+               linkText.includes('api') || 
+               linkText.includes('reference') || 
+               linkText.includes('example') || 
+               linkText.includes('tutorial') ||
+               linkText.includes('docs') ||
+               linkText.includes('documentation'))) {
+            urls.push(href);
+          }
+        } catch (error) {
+          // Skip malformed URLs
+        }
+      }
+    }
+  });
+  
+  return Array.from(new Set(urls)); // Remove duplicates
 }
 
 function extractUrlsFromSitemap(xml: string): string[] {
@@ -245,19 +337,48 @@ function formatSize(chars: number): string {
 function categorizeUrl(url: string): string {
   const path = url.toLowerCase();
   
-  if (path.includes('/api/') || path.includes('/reference/')) {
+  // More comprehensive API Reference detection
+  if (path.includes('/api/') || 
+      path.includes('/reference/') || 
+      path.includes('/ref/') ||
+      path.match(/\/api$/) ||
+      path.includes('reference')) {
     return 'API Reference';
   }
-  if (path.includes('/guide/') || path.includes('/tutorial/')) {
-    return 'Guides & Tutorials';
-  }
-  if (path.includes('/example/') || path.includes('/sample/')) {
+  
+  // Examples detection
+  if (path.includes('/example/') || 
+      path.includes('/examples/') ||
+      path.includes('/sample/') ||
+      path.includes('example')) {
     return 'Examples';
   }
-  if (path.includes('/quick') || path.includes('/start') || path.includes('/getting')) {
+  
+  // Guides and tutorials
+  if (path.includes('/guide/') || 
+      path.includes('/guides/') ||
+      path.includes('/tutorial/') ||
+      path.includes('/tutorials/') ||
+      path.includes('guide') ||
+      path.includes('tutorial')) {
+    return 'Guides & Tutorials';
+  }
+  
+  // Getting started
+  if (path.includes('/quick') || 
+      path.includes('/start') || 
+      path.includes('/getting') ||
+      path.includes('quickstart') ||
+      path.includes('introduction')) {
     return 'Getting Started';
   }
-  if (path.includes('/concept/') || path.includes('/overview/')) {
+  
+  // Concepts and overview
+  if (path.includes('/concept/') || 
+      path.includes('/concepts/') ||
+      path.includes('/overview/') ||
+      path.includes('concept') ||
+      path.includes('overview')) {
     return 'Concepts';
   }
   
