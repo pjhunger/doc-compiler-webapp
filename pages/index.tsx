@@ -185,8 +185,8 @@ export default function Home() {
                 <path d="M9 11H15M9 15H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3>Smart Discovery</h3>
-            <p>Automatic sitemap crawling finds all documentation pages efficiently</p>
+            <h3>Intelligente Erkennung</h3>
+            <p>Automatische Sitemap-Analyse findet alle Dokumentationsseiten effizient</p>
           </div>
           <div className="feature">
             <div className="feature-icon">
@@ -196,8 +196,8 @@ export default function Home() {
                 <path d="M12 1V3M21 12H23M12 21V23M4.22 4.22L5.64 5.64M18.36 5.64L19.78 4.22M1 12H3M4.22 19.78L5.64 18.36M18.36 18.36L19.78 19.78" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3>AI-Optimized</h3>
-            <p>Clean, structured output designed specifically for LLM consumption</p>
+            <h3>KI-Optimiert</h3>
+            <p>Saubere, strukturierte Ausgabe speziell für LLM-Verarbeitung entwickelt</p>
           </div>
           <div className="feature">
             <div className="feature-icon">
@@ -205,8 +205,8 @@ export default function Home() {
                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <h3>Selective Extraction</h3>
-            <p>Choose exactly which pages to include for context-optimized results</p>
+            <h3>Selektive Extraktion</h3>
+            <p>Wähle genau die Seiten aus, die du für kontext-optimierte Ergebnisse brauchst</p>
           </div>
         </div>
 

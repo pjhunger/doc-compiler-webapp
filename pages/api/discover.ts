@@ -112,8 +112,19 @@ async function discoverDocumentationStructure(url: string) {
   
   // Calculate total estimated size
   const totalEstimatedChars = pages.reduce((sum, page) => {
-    const size = parseInt(page.estimatedSize.replace(/[^\d]/g, ''));
-    return sum + size;
+    const sizeStr = page.estimatedSize.toLowerCase();
+    let chars = 0;
+    
+    if (sizeStr.includes('k')) {
+      // Extract number before 'k' and multiply by 1000
+      const kValue = parseFloat(sizeStr.replace(/[^\d.]/g, ''));
+      chars = kValue * 1000;
+    } else {
+      // Extract raw character count
+      chars = parseInt(sizeStr.replace(/[^\d]/g, '')) || 0;
+    }
+    
+    return sum + chars;
   }, 0);
   
   return {
@@ -299,6 +310,8 @@ async function getPageInfo(url: string): Promise<PageInfo> {
   const estimatedSize = estimateContentSize(html);
   const category = categorizeUrl(url);
   
+  console.log(`📊 ${url} -> ${estimatedSize} (${category})`);
+  
   return {
     url,
     title,
@@ -323,9 +336,21 @@ function extractDescription(html: string): string {
 }
 
 function estimateContentSize(html: string): string {
-  // Remove HTML tags and estimate text content
-  const textContent = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-  return formatSize(textContent.length);
+  // Remove script, style, nav, footer tags first
+  let content = html.replace(/<(?:script|style|nav|footer|header)\b[^<]*(?:(?!<\/(?:script|style|nav|footer|header)>)<[^<]*)*<\/(?:script|style|nav|footer|header)>/gi, '');
+  
+  // Remove HTML comments
+  content = content.replace(/<!--[\s\S]*?-->/g, '');
+  
+  // Extract text content and clean whitespace
+  const textContent = content.replace(/<[^>]+>/g, ' ')
+                             .replace(/\s+/g, ' ')
+                             .trim();
+  
+  // Estimate final markdown size (usually ~70% of cleaned text due to formatting)
+  const estimatedMarkdown = Math.round(textContent.length * 0.7);
+  
+  return formatSize(estimatedMarkdown);
 }
 
 function formatSize(chars: number): string {
